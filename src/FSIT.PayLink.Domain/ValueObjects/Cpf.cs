@@ -1,20 +1,13 @@
-﻿using System;
-using System.Linq;
+﻿namespace FSIT.PayLink.Domain.ValueObjects;
 
-namespace FSIT.PayLink.Domain.ValueObjects;
-
-/// <summary>CPF validado (11 dígitos e dígitos verificadores).</summary>
-public sealed record Cpf
+public sealed record Cpf(string Value)
 {
-    public string Value { get; }
-    private Cpf(string v) => Value = v;
-
     public static Cpf Of(string raw)
     {
-        var d = new string(raw.Where(char.IsDigit).ToArray());
-        if (d.Length != 11 || !IsValid(d))
+        var digits = new string(raw.Where(char.IsDigit).ToArray());
+        if (digits.Length != 11 || !IsValid(digits))
             throw new ArgumentException("CPF inválido.", nameof(raw));
-        return new Cpf(d);
+        return new Cpf(digits);
     }
 
     private static bool IsValid(string d)
@@ -30,6 +23,4 @@ public sealed record Cpf
         return Calc(9) == d[9] - '0'
             && Calc(10) == d[10] - '0';
     }
-
-    public override string ToString() => Value;
 }

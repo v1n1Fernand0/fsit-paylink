@@ -16,9 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\FSIT.PayLink.Infrastructure\FSIT.PayLink.Infrastructure.csproj" />
     <ProjectReference Include="..\FSIT.PayLink.Application\FSIT.PayLink.Application.csproj" />
     <ProjectReference Include="..\FSIT.PayLink.Contracts\FSIT.PayLink.Contracts.csproj" />
+    <ProjectReference Include="..\FSIT.PayLink.Infrastructure\FSIT.PayLink.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

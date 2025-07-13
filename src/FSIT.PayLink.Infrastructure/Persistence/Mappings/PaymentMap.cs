@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace FSIT.PayLink.Infrastructure.Persistence.Mappings;
 
-internal class PaymentMap : IEntityTypeConfiguration<Payment>
+internal sealed class PaymentMap : IEntityTypeConfiguration<Payment>
 {
     public void Configure(EntityTypeBuilder<Payment> e)
     {
@@ -24,17 +24,31 @@ internal class PaymentMap : IEntityTypeConfiguration<Payment>
              .IsRequired();
         });
 
-        e.Property(p => p.PayerCpf.Value)
-        .HasColumnName("payer_cpf")
-        .HasMaxLength(11)
-        .IsRequired();
+        e.OwnsOne(p => p.PayerCpf, c =>
+        {
+            c.Property(x => x.Value)
+             .HasColumnName("payer_cpf")
+             .HasMaxLength(11)
+             .IsRequired();
+        });
 
         e.Property(p => p.CreatedAt)
          .HasColumnName("created_at")
          .IsRequired();
-        e.Property(p => p.TenantId).HasColumnName("tenant_id").IsRequired();
-        e.Property(p => p.ProviderId).HasColumnName("provider_id").IsRequired();
-        e.Property(p => p.Status).HasColumnName("status").IsRequired();
-        e.Property(p => p.QrCodeUrl).HasColumnName("qr_code_url");
+
+        e.Property(p => p.TenantId)
+         .HasColumnName("tenant_id")
+         .IsRequired();
+
+        e.Property(p => p.ProviderId)
+         .HasColumnName("provider_id")
+         .IsRequired();
+
+        e.Property(p => p.Status)
+         .HasColumnName("status")
+         .IsRequired();
+
+        e.Property(p => p.QrCodeUrl)
+         .HasColumnName("qr_code_url");
     }
 }

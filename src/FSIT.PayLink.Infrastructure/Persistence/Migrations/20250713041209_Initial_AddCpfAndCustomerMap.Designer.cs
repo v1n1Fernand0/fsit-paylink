@@ -3,17 +3,20 @@ using System;
 using FSIT.PayLink.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace FSIT.PayLink.Infrastructure.Persistence
+namespace FSIT.PayLink.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(PayLinkDbContext))]
-    partial class PayLinkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250713041209_Initial_AddCpfAndCustomerMap")]
+    partial class Initial_AddCpfAndCustomerMap
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,11 +25,37 @@ namespace FSIT.PayLink.Infrastructure.Persistence
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("FSIT.PayLink.Domain.Entities.Payment", b =>
+            modelBuilder.Entity("FSIT.PayLink.Domain.Entities.CustomerExternalMap", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Gateway")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("gateway");
+
+                    b.Property<string>("ExternalCustomerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("external_customer_id");
+
+                    b.HasKey("TenantId", "Gateway");
+
+                    b.ToTable("customer_external_map", (string)null);
+                });
+
+            modelBuilder.Entity("Payment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<string>("ProviderId")
                         .IsRequired()
@@ -51,8 +80,27 @@ namespace FSIT.PayLink.Infrastructure.Persistence
                     b.ToTable("payments", (string)null);
                 });
 
-            modelBuilder.Entity("FSIT.PayLink.Domain.Entities.Payment", b =>
+            modelBuilder.Entity("Payment", b =>
                 {
+                    b.OwnsOne("FSIT.PayLink.Domain.ValueObjects.Cpf", "PayerCpf", b1 =>
+                        {
+                            b1.Property<Guid>("PaymentId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(11)
+                                .HasColumnType("character varying(11)")
+                                .HasColumnName("payer_cpf");
+
+                            b1.HasKey("PaymentId");
+
+                            b1.ToTable("payments");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PaymentId");
+                        });
+
                     b.OwnsOne("FSIT.PayLink.Domain.ValueObjects.Money", "Amount", b1 =>
                         {
                             b1.Property<Guid>("PaymentId")
@@ -77,6 +125,9 @@ namespace FSIT.PayLink.Infrastructure.Persistence
                         });
 
                     b.Navigation("Amount")
+                        .IsRequired();
+
+                    b.Navigation("PayerCpf")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

@@ -23,8 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\FSIT.PayLink.Application\FSIT.PayLink.Application.csproj" />
-    <ProjectReference Include="..\src\FSIT.PayLink.Domain\FSIT.PayLink.Domain.csproj" />
+    <ProjectReference Include="..\FSIT.PayLink.Application\FSIT.PayLink.Application.csproj" />
+    <ProjectReference Include="..\FSIT.PayLink.Domain\FSIT.PayLink.Domain.csproj" />
   </ItemGroup>
 
 </Project>

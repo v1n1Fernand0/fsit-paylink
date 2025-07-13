@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: paylink-db
+    environment:
+      POSTGRES_DB:    paylink
+      POSTGRES_USER:  pg
+      POSTGRES_PASSWORD: pg
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pg -d paylink"]
+      interval: 10s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: src/FSIT.PayLink.Api/Dockerfile
+    container_name: paylink-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=paylink;Username=pg;Password=pg"
+      Abacate__BaseUrl: "https://api.abacatepay.com"
+      Abacate__ApiKey: "SEU_API_KEY_AQUI"
+      Abacate__DefaultCurrency: "BRL"
+      Abacate__WebhookSecret: "SEU_SECRET_AQUI"
+    ports:
+      - "5000:80"
+    command: >
+      sh -c "dotnet ef database update
+             --project FSIT.PayLink.Infrastructure
+             --startup-project FSIT.PayLink.Api && 
+             dotnet FSIT.PayLink.Api.dll"
+
+volumes:
+  pgdata:
