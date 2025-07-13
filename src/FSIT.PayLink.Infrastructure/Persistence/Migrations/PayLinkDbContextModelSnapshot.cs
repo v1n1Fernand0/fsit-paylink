@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace FSIT.PayLink.Infrastructure.Persistence
+namespace FSIT.PayLink.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(PayLinkDbContext))]
     partial class PayLinkDbContextModelSnapshot : ModelSnapshot

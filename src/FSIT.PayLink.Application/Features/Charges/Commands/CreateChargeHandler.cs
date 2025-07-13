@@ -8,16 +8,17 @@ using FSIT.PayLink.Domain.Entities;
 using FSIT.PayLink.Domain.Repositories;
 using FSIT.PayLink.Domain.ValueObjects;
 
-public class CreateChargeHandler
+public sealed class CreateChargeHandler
     : IHandler<CreateChargeCommand, ChargeResult>
 {
     private readonly IPaymentProvider _provider;
     private readonly IPaymentRepository _repo;
     private readonly IEventPublisher _publisher;
 
-    public CreateChargeHandler(IPaymentProvider provider,
-                               IPaymentRepository repo,
-                               IEventPublisher publisher)
+    public CreateChargeHandler(
+        IPaymentProvider provider,
+        IPaymentRepository repo,
+        IEventPublisher publisher)
         => (_provider, _repo, _publisher) = (provider, repo, publisher);
 
     public async Task<ChargeResult> Handle(CreateChargeCommand c, CancellationToken ct)
@@ -26,7 +27,10 @@ public class CreateChargeHandler
             return new ChargeResult(Guid.Empty, "duplicate-within-window", null);
 
         var (provId, qr) = await _provider.CreateChargeAsync(
-            c.Amount, c.Currency, ct);
+            c.Amount,
+            c.Currency,
+            c.Cpf,       
+            ct);
 
         var payment = Payment.Create(
             Money.Of(c.Amount, c.Currency),
@@ -36,6 +40,18 @@ public class CreateChargeHandler
             qr);
 
         await _repo.AddAsync(payment, ct);
-        return new ChargeResult(payment.Id, payment.Status.ToString(), payment.QrCodeUrl);
+
+        var evt = new PaymentSucceeded(
+            payment.Id,
+            payment.Amount.Amount,
+            payment.Amount.Currency,
+            payment.TenantId,
+            DateTimeOffset.UtcNow);
+        await _publisher.PublishAsync(evt, ct);
+
+        return new ChargeResult(
+            payment.Id,
+            payment.Status.ToString().ToLowerInvariant(),
+            payment.QrCodeUrl);
     }
 }

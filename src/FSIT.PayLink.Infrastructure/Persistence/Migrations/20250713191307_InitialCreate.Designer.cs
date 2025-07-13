@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FSIT.PayLink.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(PayLinkDbContext))]
-    [Migration("20250713041209_Initial_AddCpfAndCustomerMap")]
-    partial class Initial_AddCpfAndCustomerMap
+    [Migration("20250713191307_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

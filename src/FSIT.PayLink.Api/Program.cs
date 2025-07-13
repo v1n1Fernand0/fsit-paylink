@@ -1,15 +1,15 @@
-﻿
-using FSIT.PayLink.Application.Abstractions.Messaging;
+﻿using FSIT.PayLink.Application.Abstractions.Messaging;
 using FSIT.PayLink.Application.Abstractions.Tenancy;
-using FSIT.PayLink.Application.Extensions;                 
+using FSIT.PayLink.Application.Extensions;
 using FSIT.PayLink.Application.Features.Charges.Commands;
 using FSIT.PayLink.Application.Features.Charges.Queries;
 using FSIT.PayLink.Application.Features.Webhooks.AbacatePix;
 using FSIT.PayLink.Contracts.Charges;
-using FSIT.PayLink.Infrastructure.Extensions;             
-using FSIT.PayLink.Infrastructure.Persistence;            
-using FSIT.PayLink.Api.Tenancy;                           
+using FSIT.PayLink.Infrastructure.Extensions;
+using FSIT.PayLink.Infrastructure.Persistence;
+using FSIT.PayLink.Api.Tenancy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +23,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseMiddleware<TenantContextMiddleware>();
-
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
@@ -34,6 +32,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<TenantContextMiddleware>();
 
 app.MapGet("/health", () => Results.Ok("OK"));
 
@@ -46,12 +46,12 @@ app.MapPost("/charges", async (
         dto.Amount,
         dto.Currency,
         dto.TenantId,
-        dto.Cpf);                                    
+        dto.Cpf);
 
     var res = await dispatcher.Send(cmd, ct);
 
     return res.Status == "duplicate-within-window"
-        ? Results.Conflict(res)                     
+        ? Results.Conflict(res)
         : Results.Ok(res);
 });
 

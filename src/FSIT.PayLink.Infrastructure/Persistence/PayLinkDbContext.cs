@@ -1,4 +1,5 @@
 ﻿using FSIT.PayLink.Domain.Entities;
+using FSIT.PayLink.Infrastructure.Persistence.Mappings;
 using Microsoft.EntityFrameworkCore;
 
 namespace FSIT.PayLink.Infrastructure.Persistence;
@@ -10,9 +11,10 @@ public class PayLinkDbContext : DbContext
 
     public PayLinkDbContext(DbContextOptions<PayLinkDbContext> opts) : base(opts) { }
 
-    protected override void OnModelCreating(ModelBuilder b)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        b.ApplyConfiguration(new Mappings.PaymentMap());
-        b.ApplyConfiguration(new Mappings.CustomerExternalMapMap());
+        builder.ApplyConfiguration(new PaymentMap());
+        builder.ApplyConfiguration(new CustomerExternalMapMap());
     }
+
 }

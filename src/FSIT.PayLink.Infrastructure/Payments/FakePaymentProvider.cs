@@ -1,15 +1,20 @@
-﻿using FSIT.PayLink.Application.Abstractions.Payments;   
+﻿using FSIT.PayLink.Application.Abstractions.Payments;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FSIT.PayLink.Infrastructure.Payments;
 
-/// <summary>Provider simulado que gera IDs e QR Codes de teste.</summary>
-public class FakePaymentProvider : IPaymentProvider         
+public class FakePaymentProvider : IPaymentProvider
 {
-    public Task<(string ProviderId, string? QrCodeUrl)>
-        CreateChargeAsync(decimal amount, string currency, CancellationToken ct)
+    public Task<(string ProviderId, string? QrCodeUrl)> CreateChargeAsync(
+        decimal amount,
+        string currency,
+        string cpf,                  
+        CancellationToken ct)
     {
-        var id = Guid.NewGuid().ToString("N");
-        var qr = $"https://fake.qr/{id}";
-        return Task.FromResult((id, qr));
+        var fakeId = Guid.NewGuid().ToString();
+        var fakeQr = $"https://fake.qr/{fakeId}";
+        return Task.FromResult<(string, string?)>((fakeId, fakeQr));
     }
 }
