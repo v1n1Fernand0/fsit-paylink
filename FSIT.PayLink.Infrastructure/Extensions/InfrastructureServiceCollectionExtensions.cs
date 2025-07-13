@@ -13,19 +13,20 @@ namespace FSIT.PayLink.Infrastructure.Extensions;
 
 public static class InfrastructureServiceCollectionExtensions
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection s,
-                                                       IConfiguration cfg)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection service,
+                                                       IConfiguration configuration)
     {
-        s.AddDbContext<PayLinkDbContext>(opt =>
-            opt.UseNpgsql(cfg.GetConnectionString("Default"),
+        service.AddDbContext<PayLinkDbContext>(opt =>
+            opt.UseNpgsql(configuration.GetConnectionString("Default"),
                           npg => npg.MigrationsAssembly(typeof(PayLinkDbContext).Assembly.FullName)));
 
-        s.AddScoped<IPaymentRepository, PaymentRepository>();
-        s.AddSingleton<IPaymentProvider, FakePaymentProvider>();
-        s.AddSingleton<IEventPublisher, FakeEventPublisher>();
-        s.AddSingleton<IAbacateWebhookVerifier, AbacateWebhookVerifier>();
+        service.AddScoped<IPaymentRepository, PaymentRepository>();
+        service.AddSingleton<IPaymentProvider, FakePaymentProvider>();
+        service.AddSingleton<IEventPublisher, FakeEventPublisher>();
+        service.AddSingleton<IAbacateWebhookVerifier, AbacateWebhookVerifier>();
 
 
-        return s;
+
+        return service;
     }
 }
