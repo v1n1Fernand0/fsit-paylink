@@ -1,0 +1,22 @@
+{
+  "ConnectionStrings": {
+    // string de conexão de desenvolvimento/localhost
+    "Default": "<Host=localhost;Port=5433;Database=paylink;Username=postgres;Password=postgres>"
+  },
+  "Abacate": {
+    // URL base da API de testes (sandbox) ou produção
+    "BaseUrl": "<https://api.abacatepay.com>",
+    // chave de API do seu ambiente de testes
+    "ApiKey": "<abc_dev_HFcqdUpctFPqBFPYt6mcYJWK>",
+    // moeda padrão
+    "DefaultCurrency": "<BRL>",
+    // segredo usado para validar webhooks
+    "WebhookSecret": "<69CA52D0-ECE8-48B1-8748-DE8B7B86BE96>"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning"
+    }
+  }
+}

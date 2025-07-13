@@ -416,3 +416,5 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+/src/FSIT.PayLink.Api/appsettings.Development.json
+/src/FSIT.PayLink.Api/appsettings.json
