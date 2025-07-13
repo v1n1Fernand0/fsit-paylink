@@ -1,5 +1,4 @@
-﻿using FSIT.PayLink.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace FSIT.PayLink.Infrastructure.Persistence.Mappings;
@@ -12,7 +11,6 @@ internal class PaymentMap : IEntityTypeConfiguration<Payment>
 
         e.HasKey(p => p.Id);
 
-        // ----- Money (owned type) -----
         e.OwnsOne(p => p.Amount, m =>
         {
             m.Property(x => x.Amount)
@@ -26,7 +24,14 @@ internal class PaymentMap : IEntityTypeConfiguration<Payment>
              .IsRequired();
         });
 
-        // ----- Demais propriedades -----
+        e.Property(p => p.PayerCpf.Value)
+        .HasColumnName("payer_cpf")
+        .HasMaxLength(11)
+        .IsRequired();
+
+        e.Property(p => p.CreatedAt)
+         .HasColumnName("created_at")
+         .IsRequired();
         e.Property(p => p.TenantId).HasColumnName("tenant_id").IsRequired();
         e.Property(p => p.ProviderId).HasColumnName("provider_id").IsRequired();
         e.Property(p => p.Status).HasColumnName("status").IsRequired();

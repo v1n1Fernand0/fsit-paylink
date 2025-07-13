@@ -1,21 +1,20 @@
 ﻿
-using FSIT.PayLink.Application.Abstractions.Messaging;  
-using FSIT.PayLink.Application.Extensions;                
+using FSIT.PayLink.Application.Abstractions.Messaging;
+using FSIT.PayLink.Application.Abstractions.Tenancy;
+using FSIT.PayLink.Application.Extensions;                 
 using FSIT.PayLink.Application.Features.Charges.Commands;
 using FSIT.PayLink.Application.Features.Charges.Queries;
+using FSIT.PayLink.Application.Features.Webhooks.AbacatePix;
 using FSIT.PayLink.Contracts.Charges;
 using FSIT.PayLink.Infrastructure.Extensions;             
-using FSIT.PayLink.Infrastructure.Persistence;          
+using FSIT.PayLink.Infrastructure.Persistence;            
 using FSIT.PayLink.Api.Tenancy;                           
-using FSIT.PayLink.Application.Abstractions.Tenancy;
 using Microsoft.EntityFrameworkCore;
-using FSIT.PayLink.Application.Features.Webhooks.AbacatePix;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
 
@@ -24,7 +23,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseMiddleware<TenantContextMiddleware>();           
+app.UseMiddleware<TenantContextMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -43,9 +42,17 @@ app.MapPost("/charges", async (
         IDispatcher dispatcher,
         CancellationToken ct) =>
 {
-    var cmd = new CreateChargeCommand(dto.Amount, dto.Currency, dto.TenantId);
+    var cmd = new CreateChargeCommand(
+        dto.Amount,
+        dto.Currency,
+        dto.TenantId,
+        dto.Cpf);                                    
+
     var res = await dispatcher.Send(cmd, ct);
-    return Results.Ok(res);
+
+    return res.Status == "duplicate-within-window"
+        ? Results.Conflict(res)                     
+        : Results.Ok(res);
 });
 
 app.MapGet("/charges/{id:guid}", async (
@@ -64,10 +71,19 @@ app.MapPost("/webhook/abacatepay", async (
         IDispatcher dispatcher,
         CancellationToken ct) =>
 {
-    using var r = new StreamReader(req.Body);
-    string body = await r.ReadToEndAsync(ct);
-    var cmd = new AbacateBillingPaidCommand(body, req); 
-    return await dispatcher.Send(cmd, ct);
+    using var reader = new StreamReader(req.Body);
+    var body = await reader.ReadToEndAsync(ct);
+
+    var result = await dispatcher.Send(
+        new AbacateBillingPaidCommand(body, req), ct);
+
+    return result switch
+    {
+        WebhookResult.Ok => Results.Ok(),
+        WebhookResult.NotFound => Results.NotFound(),
+        WebhookResult.Unauthorized => Results.Unauthorized(),
+        _ => Results.StatusCode(500)
+    };
 });
 
 app.Run();

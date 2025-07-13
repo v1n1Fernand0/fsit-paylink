@@ -4,6 +4,7 @@ using FSIT.PayLink.Domain.Repositories;
 using FSIT.PayLink.Infrastructure.Events;
 using FSIT.PayLink.Infrastructure.Payments;
 using FSIT.PayLink.Infrastructure.Persistence;
+using FSIT.PayLink.Infrastructure.Webhooks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,8 @@ public static class InfrastructureServiceCollectionExtensions
         s.AddScoped<IPaymentRepository, PaymentRepository>();
         s.AddSingleton<IPaymentProvider, FakePaymentProvider>();
         s.AddSingleton<IEventPublisher, FakeEventPublisher>();
+        s.AddSingleton<IAbacateWebhookVerifier, AbacateWebhookVerifier>();
+
 
         return s;
     }

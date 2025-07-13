@@ -22,23 +22,20 @@ public class CreateChargeHandler
 
     public async Task<ChargeResult> Handle(CreateChargeCommand c, CancellationToken ct)
     {
-        var gtw = await _provider.CreateChargeAsync(c.Amount, c.Currency, ct);
+        if (await _repo.HasPaidInWindowAsync(c.Cpf, c.TenantId, 30, ct))
+            return new ChargeResult(Guid.Empty, "duplicate-within-window", null);
+
+        var (provId, qr) = await _provider.CreateChargeAsync(
+            c.Amount, c.Currency, ct);
 
         var payment = Payment.Create(
             Money.Of(c.Amount, c.Currency),
-            c.TenantId, gtw.ProviderId, gtw.QrCodeUrl);
+            Cpf.Of(c.Cpf),
+            c.TenantId,
+            provId,
+            qr);
 
         await _repo.AddAsync(payment, ct);
-
-        var evt = new PaymentSucceeded(
-            payment.Id,
-            payment.Amount.Amount,
-            payment.Amount.Currency,
-            payment.TenantId,
-            DateTimeOffset.UtcNow);
-
-        await _publisher.PublishAsync(evt, ct);
-
         return new ChargeResult(payment.Id, payment.Status.ToString(), payment.QrCodeUrl);
     }
 }

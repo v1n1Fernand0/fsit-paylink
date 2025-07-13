@@ -38,4 +38,7 @@ public interface IPaymentRepository
         string gateway,
         string extId,
         CancellationToken ct);
+
+    Task<bool> HasPaidInWindowAsync(string cpf, string tenantId, int days, CancellationToken ct);
+
 }

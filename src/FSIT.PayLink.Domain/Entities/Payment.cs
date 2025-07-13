@@ -1,40 +1,37 @@
-﻿using FSIT.PayLink.Domain.Events;
+﻿using FSIT.PayLink.Domain.Entities;
 using FSIT.PayLink.Domain.ValueObjects;
 
-namespace FSIT.PayLink.Domain.Entities;
-
-/// <summary>Aggregate-root que representa uma cobrança.</summary>
 public class Payment
 {
     public Guid Id { get; private set; }
+    public Money Amount { get; private set; }
+    public Cpf PayerCpf { get; private set; }
     public string TenantId { get; private set; } = default!;
-    public Money Amount { get; private set; } = default!;
     public string ProviderId { get; private set; } = default!;
-    public PaymentStatus Status { get; private set; } = PaymentStatus.Pending;
     public string? QrCodeUrl { get; private set; }
+    public PaymentStatus Status { get; private set; }
+    public DateTime CreatedAt { get; private set; }
 
-    private Payment() { }
-
-    public static Payment Create(Money amount,
-                                 string tenantId,
-                                 string providerId,
-                                 string? qrCodeUrl)
-        => new()
+    public static Payment Create(
+        Money amount,
+        Cpf cpf,
+        string tenantId,
+        string providerId,
+        string? qr)
+    {
+        return new Payment
         {
             Id = Guid.NewGuid(),
             Amount = amount,
+            PayerCpf = cpf,
             TenantId = tenantId,
             ProviderId = providerId,
-            QrCodeUrl = qrCodeUrl
+            QrCodeUrl = qr,
+            Status = PaymentStatus.Pending,
+            CreatedAt = DateTime.UtcNow
         };
-
-    public PaymentSucceeded MarkSucceeded()
-    {
-        if (Status != PaymentStatus.Succeeded)
-            Status = PaymentStatus.Succeeded;
-
-        return new PaymentSucceeded(Id);
     }
 
-    public void MarkFailed() => Status = PaymentStatus.Failed;
+    public void MarkSucceeded() =>
+        Status = PaymentStatus.Succeeded;
 }

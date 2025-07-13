@@ -9,10 +9,6 @@ public class PaymentRepository : IPaymentRepository
     private readonly PayLinkDbContext _db;
     public PaymentRepository(PayLinkDbContext db) => _db = db;
 
-    /* -----------------------------------------------------------------------
-       Pagamentos
-    ----------------------------------------------------------------------- */
-
     public async Task AddAsync(Payment entity, CancellationToken ct)
     {
         _db.Payments.Add(entity);
@@ -30,13 +26,9 @@ public class PaymentRepository : IPaymentRepository
 
     public Task SaveAsync(CancellationToken ct) => _db.SaveChangesAsync(ct);
 
-    /* -----------------------------------------------------------------------
-       Mapeamento de Cliente Externo (Abacate)
-    ----------------------------------------------------------------------- */
-
     public Task<CustomerExternalMap?> GetCustomerExternalMapAsync(
         Guid tenantId, string gateway, CancellationToken ct) =>
-        _db.CustomerExternalMaps                       // DbSet no DbContext
+        _db.CustomerExternalMaps                     
            .AsNoTracking()
            .FirstOrDefaultAsync(m =>
                 m.TenantId == tenantId && m.Gateway == gateway, ct);
@@ -52,4 +44,15 @@ public class PaymentRepository : IPaymentRepository
         });
         await _db.SaveChangesAsync(ct);
     }
+
+    public Task<bool> HasPaidInWindowAsync(
+        string cpf, string tenantId, int days, CancellationToken ct) =>
+        _db.Payments.AnyAsync(p =>
+            p.PayerCpf.Value == cpf &&
+            p.TenantId == tenantId &&
+            p.Status == PaymentStatus.Succeeded &&
+            p.CreatedAt >= DateTime.UtcNow.AddDays(-days),
+        ct);
+
+
 }
