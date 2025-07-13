@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Núcleo do EF Core -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
+    <!-- Extensões relacionais (ToTable, HasColumnName, OwnsOne, etc.) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.7" />
+    <!-- Provider PostgreSQL (traz Npgsql + migrations para Postgres) -->
+    <!-- (Opcional) Ferramentas de design para 'dotnet ef migrations' -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+
+    <!-- Dependência de configuração (mesma major/minor) -->
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\FSIT.PayLink.Application\FSIT.PayLink.Application.csproj" />
+    <ProjectReference Include="..\src\FSIT.PayLink.Domain\FSIT.PayLink.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
